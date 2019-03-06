@@ -64,6 +64,9 @@ func (self *LoginController) LoginIn() {
 				user.Update()
 				authkey = libs.Md5([]byte(self.getClientIp() + "|" + user.Password + user.Salt))
 				self.Ctx.SetCookie("auth", strconv.Itoa(user.Id)+"|"+authkey, 7*86400)
+				self.SetSession("loginuser", username)
+				fmt.Println("当前的session:")
+        		fmt.Println(self.CruSession)
 				errorMsg = "ok"
 				
 				//fmt.Println(self.Data["json"])
@@ -81,9 +84,13 @@ func (self *LoginController) LoginIn() {
 	//self.TplName = "login/login.html"
 }
 
-//登出
+// 登出
 func (self *LoginController) LoginOut() {
 	self.Ctx.SetCookie("auth", "")
+	// 删除指定的session   
+	self.DelSession("loginuser")
+	// 销毁全部的session
+	self.DestroySession()
 	self.Data["json"] = map[string]interface{}{"status": 200, "message": "loingOut", "token": ""}
 	fmt.Println(self.Data["json"])
     self.ajaxMsg(self.Data["json"] , 1)
